@@ -50,7 +50,7 @@ main () {
     return 1
   fi
 
-  me=$(git config github.user || git config user.name)
+  me=$(git config github.user)
   if [ "$me" == "" ]; then
     echo "run 'git config --add github.user <username>'" >&2
     return 1
