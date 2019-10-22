@@ -9,7 +9,7 @@
     "postversion": "npm publish",
     "postpublish": "git push origin --follow-tags"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/npm/pull.git"
