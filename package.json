@@ -1,0 +1,15 @@
+{
+  "name": "@npmcli/pull",
+  "description": "A bash script for landing pull requests",
+  "bin": "pull.sh",
+  "files": [
+    "pr"
+  ],
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/npm/pull.git"
+  },
+  "license": "ISC",
+  "dependencies": {}
+}
