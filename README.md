@@ -3,6 +3,13 @@
 This is a script for landing pull requests with the npm CLI team's
 annotations.
 
+## Dependencies
+
+Make sure you have [json](https://www.npmjs.com/package/json) installed:
+```
+npm install -g json
+```
+
 ## USAGE
 
 ```bash
