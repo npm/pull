@@ -1,4 +1,4 @@
-# @npmcli/pr
+# @npmcli/pull
 
 This is a script for landing pull requests with the npm CLI team's
 annotations.
