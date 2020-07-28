@@ -82,7 +82,8 @@ finish () {
   fi
 
   local curbranch="$1"
-  local ref=$(cat .git/HEAD)
+  local githead=$(git rev-parse --git-path HEAD)
+  local ref=$(cat $githead)
   local prnum
   case $ref in
     "ref: refs/heads/PR-"*)
