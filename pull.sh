@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-# Land a pull request
-# Creates a PR-### branch, pulls the commits, opens up an interactive rebase to
-# squash, and then annotates the commit with the changelog goobers
-#
-# Usage:
-#   pr <url|number> [<upstream remote>=origin]
+DIR="$( dirname "${BASH_SOURCE[0]}" )"
+JSON_BIN="$DIR/node_modules/.bin/json"
+
+Land a pull request
+Creates a PR-### branch, pulls the commits, opens up an interactive rebase to
+squash, and then annotates the commit with the changelog goobers
+
+Usage:
+  pr <url|number> [<upstream remote>=origin]
 
 main () {
   if [ "$1" = "finish" ]; then
@@ -31,7 +34,7 @@ main () {
   local prweb="https://github.com/$prpath"
   local root="$(prroot "$url")"
   local api="https://api.github.com/repos/${repo}/pulls/${num}"
-  local user=$(curl -s $api | json user.login)
+  local user=$(curl -s $api | $JSON_BIN user.login)
   local ref="$(prref "$url" "$root")"
   local curhead="$(git show --no-patch --pretty=%H HEAD)"
   local curbranch="$(git rev-parse --abbrev-ref HEAD)"
@@ -111,7 +114,7 @@ finish () {
   local root="$(prroot "$url")"
 
   local api="https://api.github.com/repos/${repo}/pulls/${num}"
-  local user=$(curl -s $api | json user.login)
+  local user=$(curl -s $api | $JSON_BIN user.login)
 
   local lastmsg="$(git log -1 --pretty=%B)"
   local newmsg="${lastmsg}
