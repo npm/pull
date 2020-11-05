@@ -5,10 +5,7 @@ annotations.
 
 ## Dependencies
 
-Make sure you have [json](https://www.npmjs.com/package/json) installed:
-```
-npm install -g json
-```
+This requires `node`, `git`, and `curl` to be installed on your system.
 
 ## USAGE
 

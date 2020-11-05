@@ -7,6 +7,15 @@
 # Usage:
 #   pr <url|number> [<upstream remote>=origin]
 
+get_user_login () {
+  node -e '
+data = []
+process.stdin.on("end", () =>
+  console.log(JSON.parse(Buffer.concat(data).toString()).user.login))
+process.stdin.on("data", c => data.push(c))
+'
+}
+
 main () {
   if [ "$1" = "finish" ]; then
     shift
@@ -31,7 +40,7 @@ main () {
   local prweb="https://github.com/$prpath"
   local root="$(prroot "$url")"
   local api="https://api.github.com/repos/${repo}/pulls/${num}"
-  local user=$(curl -s $api | json user.login)
+  local user=$(curl -s $api | get_user_login)
   local ref="$(prref "$url" "$root")"
   local curhead="$(git show --no-patch --pretty=%H HEAD)"
   local curbranch="$(git rev-parse --abbrev-ref HEAD)"
@@ -111,7 +120,7 @@ finish () {
   local root="$(prroot "$url")"
 
   local api="https://api.github.com/repos/${repo}/pulls/${num}"
-  local user=$(curl -s $api | json user.login)
+  local user=$(curl -s $api | get_user_login)
 
   local lastmsg="$(git log -1 --pretty=%B)"
   local newmsg="${lastmsg}
