@@ -65,7 +65,7 @@ main () {
     git pull --rebase origin pull/$num/head
   fi
 
-  git rebase -i $curbranch # squash and test
+  git rebase -i --autosquash $curbranch # squash and test
 
   if [ $? -eq 0 ]; then
     finish "${curbranch}"
