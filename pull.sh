@@ -16,10 +16,34 @@ process.stdin.on("data", c => data.push(c))
 '
 }
 
+get_head_repo_ssh_url () {
+  node -e '
+data = []
+process.stdin.on("end", () =>
+  console.log(JSON.parse(Buffer.concat(data).toString()).head.repo.ssh_url))
+process.stdin.on("data", c => data.push(c))
+'
+}
+
+get_head_ref () {
+  node -e '
+data = []
+process.stdin.on("end", () =>
+  console.log(JSON.parse(Buffer.concat(data).toString()).head.ref))
+process.stdin.on("data", c => data.push(c))
+'
+}
+
 main () {
   if [ "$1" = "finish" ]; then
     shift
     finish "$@"
+    return $?
+  fi
+
+  if [ "$1" = "update" ]; then
+    shift
+    update
     return $?
   fi
 
@@ -32,6 +56,8 @@ main () {
     echo "  $0 <url|number> [<upstream remote>=origin]"
     echo "from PR branch:"
     echo "  $0 finish <target branch>"
+    echo "from main branch:"
+    echo "  $0 update"
     exit 1
   fi
 
@@ -133,9 +159,43 @@ Reviewed-by: @${me}
   git commit --amend -m "$newmsg"
   git checkout $curbranch
   git merge PR-${prnum} --ff-only
+
+  update
+
   set +x
 }
 
+update () {
+  set -x
+  local url=$(git show --no-patch HEAD | grep PR-URL | tail -n1 | awk '{print $2}')
+  local num=$(basename "$url")
+
+  if [ "$num" == "" ]; then
+    echo "could not find PR number" >&2
+    return 1
+  fi
+
+  local prpath="${url#https://github.com/}"
+  local repo=${prpath%/pull/$num}
+  local api_endpoint="https://api.github.com/repos/${repo}/pulls/${num}"
+
+  # force-push commit to the user's fork to give it the purple merge
+  # it's an optional thing so we ignore any errors
+  set +x
+  local api=$(curl -s $api_endpoint)
+  local remote=$(echo $api | get_head_repo_ssh_url 2> /dev/null)
+  local branch=$(echo $api | get_head_ref 2> /dev/null)
+  set -x
+
+  if [ "$remote" == "" ] || \
+     [ "$branch" == "" ]; then
+    echo "⚠️ original remote/branch not found, PR will be marked as closed"
+    return 0
+  fi
+
+  git push $remote +HEAD:$branch
+  set +x
+}
 
 prurl () {
   local url="$1"
