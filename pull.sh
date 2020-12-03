@@ -157,13 +157,10 @@ Close: #${num}
 Reviewed-by: @${me}
 "
   git commit --amend -m "$newmsg"
-  set +x
-
-  update
-
-  set -x
   git checkout $curbranch
   git merge PR-${prnum} --ff-only
+
+  update
 
   set +x
 }
