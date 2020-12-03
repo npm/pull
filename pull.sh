@@ -193,7 +193,38 @@ update () {
     return 0
   fi
 
+  local curbranch="$(git branch --show-current)"
+
+  # retarget the original contributors PR to point to that branch
+  if hash gh 2>/dev/null; then
+    local gh_api_endpoint="repos/${repo}/pulls/${num}"
+    gh api $gh_api_endpoint --field base="$curbranch" 1> /dev/null
+  else
+    echo "⚠️ we need the gh cli in order to retarget PR"
+    echo "  get it now: https://github.com/cli/cli"
+    echo "  You may want to manually retarget this PR in the web interface."
+  fi
+
+  # pushes ammended commit back to contributors PR branch
   git push $remote +HEAD:$branch
+
+  # look up and see if we're in the potential default branch
+  local defaultbranch=$(git config --get init.defaultbranch)
+  if [ "$curbranch" == "" ] || \
+     [ "$curbranch" == "$defaultbranch" ] || \
+     [ "$curbranch" == "master" ] || \
+     [ "$curbranch" == "main" ] || \
+     [ "$curbranch" == "latest" ]; then
+    echo "ℹ️ looks like we're in the default branch, skipping auto push"
+  else
+    # finishes updating our release/working remote branch
+    local us="$1"
+    if [ "$us" == "" ]; then
+      us="origin"
+    fi
+    git push $us $curbranch
+  fi
+
   set +x
 }
 

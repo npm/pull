@@ -7,6 +7,9 @@ annotations.
 
 This requires `node`, `git`, and `curl` to be installed on your system.
 
+Also [`gh`](https://github.com/cli/cli) is an optional requirement that will
+enable retargetting PRs to a release-branch.
+
 ## USAGE
 
 ```bash
