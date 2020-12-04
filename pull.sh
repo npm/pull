@@ -160,8 +160,6 @@ Reviewed-by: @${me}
   git checkout $curbranch
   git merge PR-${prnum} --ff-only
 
-  update
-
   set +x
 }
 
