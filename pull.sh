@@ -193,6 +193,12 @@ update () {
 
   local curbranch="$(git branch --show-current)"
 
+  # do an initial push just to make sure it exists, otherwise
+  # the retargetting will fail.
+  if should_push "$curbranch" "$defaultbranch"; then
+    git push origin HEAD^:"$curbranch"
+  fi
+
   # retarget the original contributors PR to point to that branch
   if hash gh 2>/dev/null; then
     local gh_api_endpoint="repos/${repo}/pulls/${num}"
@@ -202,18 +208,14 @@ update () {
     echo "  get it now: https://github.com/cli/cli"
     echo "  You may want to manually retarget this PR in the web interface."
   fi
+  local defaultbranch=$(git config --get init.defaultbranch)
 
-  # pushes ammended commit back to contributors PR branch
-  git push $remote +HEAD:$branch
+  # pushes amended commit back to contributors PR branch
+  git push "$remote" "+HEAD:$branch"
 
   # look up and see if we're in the potential default branch
-  local defaultbranch=$(git config --get init.defaultbranch)
-  if [ "$curbranch" == "" ] || \
-     [ "$curbranch" == "$defaultbranch" ] || \
-     [ "$curbranch" == "master" ] || \
-     [ "$curbranch" == "main" ] || \
-     [ "$curbranch" == "latest" ]; then
-    echo "ℹ️ looks like we're in the default branch, skipping auto push"
+  if ! should_push "$curbranch" "$defaultbranch"; then
+    echo "looks like we're in the default branch, skipping auto push" >&2
   else
     # finishes updating our release/working remote branch
     local us="$1"
@@ -224,6 +226,16 @@ update () {
   fi
 
   set +x
+}
+
+should_push () {
+  local curbranch=$1
+  local defaultbranch=$2
+  [ "$curbranch" != "" ] && \
+    [ "$curbranch" != "$defaultbranch" ] && \
+    [ "$curbranch" != "master" ] && \
+    [ "$curbranch" != "main" ] && \
+    [ "$curbranch" != "latest" ]
 }
 
 prurl () {
