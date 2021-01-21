@@ -51,13 +51,13 @@ main () {
   local num=$(basename $url)
 
   if ! [[ $num =~ ^[0-9]+$ ]]; then
-    echo "usage:"
-    echo "from target branch:"
-    echo "  $0 <url|number> [<upstream remote>=origin]"
-    echo "from PR branch:"
-    echo "  $0 finish <target branch>"
-    echo "from main branch:"
-    echo "  $0 update"
+    echo "usage:" >&2
+    echo "from target branch:" >&2
+    echo "  $0 <url|number> [<upstream remote>=origin]" >&2
+    echo "from PR branch:" >&2
+    echo "  $0 finish <target branch>" >&2
+    echo "from main branch:" >&2
+    echo "  $0 update" >&2
     exit 1
   fi
 
@@ -105,7 +105,7 @@ main () {
   if [ $? -eq 0 ]; then
     finish "${curbranch}"
   else
-    echo "resolve conflicts and run: $0 finish "'"'${curbranch}'"'
+    echo "resolve conflicts and run: $0 finish "'"'${curbranch}'"' >&2
   fi
 }
 
@@ -187,7 +187,7 @@ update () {
 
   if [ "$remote" == "" ] || \
      [ "$branch" == "" ]; then
-    echo "⚠️ original remote/branch not found, PR will be marked as closed"
+    echo "original remote/branch not found, PR will be marked as closed" >&2
     return 0
   fi
 
@@ -204,9 +204,9 @@ update () {
     local gh_api_endpoint="repos/${repo}/pulls/${num}"
     gh api $gh_api_endpoint --field base="$curbranch" 1> /dev/null
   else
-    echo "⚠️ we need the gh cli in order to retarget PR"
-    echo "  get it now: https://github.com/cli/cli"
-    echo "  You may want to manually retarget this PR in the web interface."
+    echo "we need the gh cli in order to retarget PR" >&2
+    echo "get it now: https://github.com/cli/cli" >&2
+    echo "You may want to manually retarget this PR in the web interface." >&2
   fi
   local defaultbranch=$(git config --get init.defaultbranch)
 
@@ -263,11 +263,11 @@ prurl () {
 
   local p='^https:\/\/github.com\/[^\/]+\/[^\/]+\/pull\/[0-9]+$'
   if ! [[ "$url" =~ $p ]]; then
-    echo "Usage:"
-    echo "  $0 <pull req url>"
-    echo "  $0 <pull req number> [<remote name>=origin]"
+    echo "Usage:" >&2
+    echo "  $0 <pull req url>" >&2
+    echo "  $0 <pull req number> [<remote name>=origin]" >&2
     type pbpaste &>/dev/null &&
-      echo "(will read url/id from clipboard if not specified)"
+      echo "(will read url/id from clipboard if not specified)" >&2
     exit 1
   fi
   url="${url/https:\/\/github\.com\//git@github.com:}"
