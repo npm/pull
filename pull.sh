@@ -34,6 +34,22 @@ process.stdin.on("data", c => data.push(c))
 '
 }
 
+get_reviewers () {
+  local me=$1
+  node -e '
+data = []
+process.stdin.on("end", () => {
+  const reviews = JSON.parse(Buffer.concat(data).toString())
+  const approvers = [...new Set(reviews
+    .filter(a => a.state === "APPROVED")
+    .map(a => a.user.login)
+  )]
+  console.log(approvers.join(", @").trim() || process.argv[1])
+})
+process.stdin.on("data", c => data.push(c))
+' "$me"
+}
+
 main () {
   if [ "$1" = "finish" ]; then
     shift
@@ -148,13 +164,16 @@ finish () {
   local api="https://api.github.com/repos/${repo}/pulls/${num}"
   local user=$(curl -s $api | get_user_login)
 
+  local reviewsApi="https://api.github.com/repos/${repo}/pulls/${num}/reviews"
+  local reviewers=$(curl -s $reviewsApi | get_reviewers "$me")
+
   local lastmsg="$(git log -1 --pretty=%B)"
   local newmsg="${lastmsg}
 
 PR-URL: ${prweb}
 Credit: @${user}
 Close: #${num}
-Reviewed-by: @${me}
+Reviewed-by: @${reviewers}
 "
   git commit --amend -m "$newmsg"
   git checkout $curbranch
